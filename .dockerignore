@@ -1,0 +1,9 @@
+**/test
+**/__mocks__
+node_modules
+dist
+coverage
+**/.*
+!.eslintrc.js
+README.md
+yarn.lock

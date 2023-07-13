@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  ticket-managment-api:
+    build:
+      context: .
+    image: "ticket-managment-api:1.0"
+    container_name: "ticket-managment-api"
+    depends_on:
+      - ticket-managment-db
+    restart: always
+    networks:
+      - ticket-service-net
+    ports:
+      - 3000:3000
+    env_file:
+      - .env
+
+  ticket-managment-db:
+    image: "mongo"
+    container_name: "ticket-managment-db"
+    restart: always
+    networks:
+      - ticket-service-net
+    volumes:
+      - db-volume:/data/db:rw
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: strongPassword
+
+networks:
+  ticket-service-net:
+    name: "ticket-services-net"
+volumes:
+  db-volume:
+    name: "db-volume"
