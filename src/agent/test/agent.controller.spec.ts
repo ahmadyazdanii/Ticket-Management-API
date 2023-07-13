@@ -102,10 +102,9 @@ describe('Agent Controller', () => {
     let ticket;
 
     beforeEach(async () => {
-      ticket = await controller.changeTicketStatus(
-        String(ticketStub()._id),
-        ticketStub().status,
-      );
+      ticket = await controller.changeTicketStatus(String(ticketStub()._id), {
+        status: ticketStub().status,
+      });
     });
 
     test('then it should call changeTicketStatus service', () => {
@@ -207,14 +206,14 @@ describe('Agent Controller', () => {
       };
 
       agent = await controller.updateAgent(
-        agentStub('operator')._id,
+        String(agentStub('operator')._id),
         updateAgentDTOStub,
       );
     });
 
     test('then it should call updateAgent service', () => {
       expect(agentService.updateAgent).toBeCalledWith(
-        agentStub('operator')._id,
+        String(agentStub('operator')._id),
         updateAgentDTOStub,
       );
     });
@@ -228,12 +227,12 @@ describe('Agent Controller', () => {
     let agent;
 
     beforeEach(async () => {
-      agent = await controller.removeAgent(agentStub('operator')._id);
+      agent = await controller.removeAgent(String(agentStub('operator')._id));
     });
 
     test('then it should call deleteAgent service', () => {
       expect(agentService.deleteAgent).toBeCalledWith(
-        agentStub('operator')._id,
+        String(agentStub('operator')._id),
       );
     });
 

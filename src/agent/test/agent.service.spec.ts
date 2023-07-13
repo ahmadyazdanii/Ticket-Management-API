@@ -43,7 +43,7 @@ describe('Agent Service', () => {
     let agent_id: string;
 
     beforeEach(async () => {
-      agent_id = agentStub('operator')._id;
+      agent_id = String(agentStub('operator')._id);
 
       jest
         .spyOn(repository, 'findOne')
@@ -125,7 +125,7 @@ describe('Agent Service', () => {
     let updateAgentDto: UpdateAgentDTO;
 
     beforeEach(async () => {
-      agent_id = agentStub('operator')._id;
+      agent_id = String(agentStub('operator')._id);
 
       updateAgentDto = {
         email_address: agentStub('operator').email_address,
@@ -161,7 +161,7 @@ describe('Agent Service', () => {
     let agent_id: string;
 
     beforeEach(async () => {
-      agent_id = agentStub('operator')._id;
+      agent_id = String(agentStub('operator')._id);
 
       jest
         .spyOn(repository, 'deleteOne')
