@@ -15,7 +15,6 @@ export class TicketService {
 
   getAllTickets() {
     return this.ticketModel.find({}, [
-      '_id',
       'title',
       'status',
       'department',
@@ -28,7 +27,6 @@ export class TicketService {
 
   getUserTickets(user_id: string) {
     return this.ticketModel.find({ user_id }, [
-      '_id',
       'title',
       'status',
       'department',
