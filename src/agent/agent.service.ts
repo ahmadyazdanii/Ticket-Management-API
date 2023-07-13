@@ -54,14 +54,6 @@ export class AgentService {
       );
     }
 
-    return [
-      {
-        _id: agent._id,
-        name: agent.name,
-        email_address: agent.email_address,
-        role: agent.role,
-      } as AgentDocument,
-      await this.jwtService.signAsync({ username: agent._id }),
-    ];
+    return [agent, await this.jwtService.signAsync({ username: agent._id })];
   }
 }

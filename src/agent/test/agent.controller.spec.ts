@@ -88,7 +88,7 @@ describe('Agent Controller', () => {
     test('then it should call createMessageViaAgent service', () => {
       expect(ticketService.createMessageViaAgent).toBeCalledWith(
         String(ticketStub()._id),
-        agentStub('admin')._id,
+        String(agentStub('admin')._id),
         createMessageViaAgentDTOStub,
       );
     });
