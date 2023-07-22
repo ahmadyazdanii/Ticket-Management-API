@@ -3,7 +3,7 @@ services:
   ticket-managment-api:
     build:
       context: .
-    image: "ticket-managment-api:1.0"
+    image: "ticket-managment-api"
     container_name: "ticket-managment-api"
     depends_on:
       - ticket-managment-db
@@ -12,6 +12,8 @@ services:
       - ticket-service-net
     ports:
       - 3000:3000
+    environment:
+      NODE_ENV: production
     env_file:
       - .env
 
@@ -25,7 +27,7 @@ services:
       - db-volume:/data/db:rw
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: strongPassword
+      MONGO_INITDB_ROOT_PASSWORD: root
 
 networks:
   ticket-service-net:
