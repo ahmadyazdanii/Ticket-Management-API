@@ -36,19 +36,20 @@ describe('Agent module (E2E)', () => {
     const hashedPassword = hashSync('12345678', 15);
 
     beforeAll(async () => {
-      await connection.collection('agents').insertOne({
-        name: 'admin',
-        email_address: 'admin@test.com',
-        role: 'admin',
-        password: String(hashedPassword),
-      });
-
-      await connection.collection('agents').insertOne({
-        name: 'operator',
-        email_address: 'operator@test.com',
-        role: 'operator',
-        password: String(hashedPassword),
-      });
+      await connection.collection('agents').insertMany([
+        {
+          name: 'operator',
+          email_address: 'operator@test.com',
+          role: 'operator',
+          password: String(hashedPassword),
+        },
+        {
+          name: 'admin',
+          email_address: 'admin@test.com',
+          role: 'admin',
+          password: String(hashedPassword),
+        },
+      ]);
     });
 
     afterAll(async () => {
@@ -463,8 +464,158 @@ describe('Agent module (E2E)', () => {
     });
   });
 
-  // describe('when /agent/members (GET) is called', () => {});
-  // describe('when /agent/members (PUT) is called', () => {});
+  describe('when /agent/members (GET) is called', () => {
+    let operatorCookies: string[];
+    let adminCookies: string[];
+    const hashedPassword = hashSync('12345678', 15);
+
+    beforeAll(async () => {
+      await connection.collection('agents').insertMany([
+        {
+          name: 'operator',
+          email_address: 'operator@test.com',
+          role: 'operator',
+          password: String(hashedPassword),
+        },
+        {
+          name: 'admin',
+          email_address: 'admin@test.com',
+          role: 'admin',
+          password: String(hashedPassword),
+        },
+      ]);
+
+      const [operator_response, admin_response] = await Promise.all([
+        request(httpServer).post('/agent/auth/signin').send({
+          email_address: 'operator@test.com',
+          password: '12345678',
+        }),
+        request(httpServer).post('/agent/auth/signin').send({
+          email_address: 'admin@test.com',
+          password: '12345678',
+        }),
+      ]);
+
+      operatorCookies = operator_response.header['set-cookie'];
+      adminCookies = admin_response.header['set-cookie'];
+    });
+
+    afterAll(async () => {
+      await connection.collection('agents').deleteMany({});
+    });
+
+    test('then it should return error when cookie not provided', () => {
+      return request(httpServer).get('/agent/members').expect(401);
+    });
+
+    test('then it should return error when operator try to access', () => {
+      return request(httpServer)
+        .get('/agent/members')
+        .set('Cookie', [...operatorCookies])
+        .expect(403);
+    });
+
+    test('then it should return members when admin try to access', async () => {
+      const { body, statusCode } = await request(httpServer)
+        .get('/agent/members')
+        .set('Cookie', [...adminCookies]);
+
+      expect(statusCode).toBe(200);
+      expect(body).toEqual([
+        {
+          _id: expect.any(String),
+          name: 'operator',
+          email_address: 'operator@test.com',
+          role: 'operator',
+        },
+        {
+          _id: expect.any(String),
+          name: 'admin',
+          email_address: 'admin@test.com',
+          role: 'admin',
+        },
+      ]);
+    });
+  });
+
+  describe('when /agent/members (PUT) is called', () => {
+    let operatorCookies: string[];
+    let adminCookies: string[];
+    const hashedPassword = hashSync('12345678', 15);
+
+    beforeAll(async () => {
+      await connection.collection('agents').insertMany([
+        {
+          name: 'operator',
+          email_address: 'operator@test.com',
+          role: 'operator',
+          password: String(hashedPassword),
+        },
+        {
+          name: 'admin',
+          email_address: 'admin@test.com',
+          role: 'admin',
+          password: String(hashedPassword),
+        },
+      ]);
+
+      const [operator_response, admin_response] = await Promise.all([
+        request(httpServer).post('/agent/auth/signin').send({
+          email_address: 'operator@test.com',
+          password: '12345678',
+        }),
+        request(httpServer).post('/agent/auth/signin').send({
+          email_address: 'admin@test.com',
+          password: '12345678',
+        }),
+      ]);
+
+      operatorCookies = operator_response.header['set-cookie'];
+      adminCookies = admin_response.header['set-cookie'];
+    });
+
+    afterAll(async () => {
+      await connection.collection('agents').deleteMany({});
+    });
+
+    test('then it should return error when cookie not provided', () => {
+      return request(httpServer).put('/agent/members').expect(401);
+    });
+
+    test('then it should return error when operator try to access', () => {
+      return request(httpServer)
+        .put('/agent/members')
+        .set('Cookie', [...operatorCookies])
+        .expect(403);
+    });
+
+    test('then it should return error when input data is invalid', () => {
+      return request(httpServer)
+        .put('/agent/members')
+        .set('Cookie', [...adminCookies])
+        .expect(400);
+    });
+
+    test('then it should return new agent when input data is valid', async () => {
+      const { statusCode, body } = await request(httpServer)
+        .put('/agent/members')
+        .set('Cookie', [...adminCookies])
+        .send({
+          name: 'test',
+          email_address: 'test@test.com',
+          password: '12345678',
+          role: 'operator',
+        });
+
+      expect(statusCode).toBe(200);
+      expect(body).toEqual({
+        _id: expect.any(String),
+        name: 'test',
+        email_address: 'test@test.com',
+        role: 'operator',
+      });
+    });
+  });
   // describe('when /agent/members/:member_id (PATCH) is called', () => {});
   // describe('when /agent/members/:member_id (DELETE) is called', () => {});
 });
