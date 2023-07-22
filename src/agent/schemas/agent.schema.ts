@@ -18,7 +18,7 @@ export class Agent {
   @Prop({ required: true, enum: ['admin', 'operator'] })
   role: AgentRole;
 
-  @Prop({ required: true })
+  @Prop({ required: true, select: false })
   password: string;
 
   validatePassword: (candidatePassword: string) => Promise<boolean>;
