@@ -9,6 +9,7 @@ import { agentStub } from './stubs/agent.stub';
 import { CreateAgentDTO } from '../dtos/createAgent.dto';
 import { UpdateAgentDTO } from '../dtos/updateAgent.dto';
 import { SigninDTO } from '../dtos/signin.dto';
+import { pick } from 'lodash';
 
 describe('Agent Service', () => {
   let service: AgentService;
@@ -101,11 +102,11 @@ describe('Agent Service', () => {
         role: agentStub('operator').role,
       };
 
-      jest
-        .spyOn(repository, 'create')
-        .mockResolvedValueOnce([
-          agentStub('operator') as unknown as AgentDocument,
-        ]);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      jest.spyOn(repository, 'create').mockResolvedValueOnce({
+        toObject: jest.fn().mockReturnValue(agentStub('operator')),
+      } as unknown as AgentDocument);
 
       agent = await service.createAgent(createAgentDto);
     });
@@ -115,7 +116,9 @@ describe('Agent Service', () => {
     });
 
     test('then it should return a agent list', () => {
-      expect(agent).toEqual([agentStub('operator')]);
+      expect(agent).toEqual(
+        pick(agentStub('operator'), ['_id', 'name', 'email_address', 'role']),
+      );
     });
   });
 
@@ -180,7 +183,7 @@ describe('Agent Service', () => {
   });
 
   describe('when signin is called', () => {
-    let returnValues: [AgentDocument, string];
+    let returnValues: [Omit<AgentDocument, 'password'>, string];
     let signinDto: SigninDTO;
     let isValidatePassword: boolean;
 
@@ -191,10 +194,17 @@ describe('Agent Service', () => {
       };
 
       isValidatePassword = true;
+      const mockValidationPassword = jest
+        .fn()
+        .mockResolvedValueOnce(isValidatePassword);
 
       jest.spyOn(repository, 'findOne').mockResolvedValueOnce({
         ...agentStub('operator'),
-        validatePassword: jest.fn().mockResolvedValueOnce(isValidatePassword),
+        validatePassword: mockValidationPassword,
+        toObject: jest.fn().mockReturnValue({
+          ...agentStub('operator'),
+          validatePassword: mockValidationPassword,
+        }),
       });
 
       jest

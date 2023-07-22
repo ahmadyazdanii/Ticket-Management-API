@@ -6,6 +6,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { AgentRole } from '../agent.interface';
 
 export class CreateAgentDTO {
   @MaxLength(128)
@@ -21,6 +22,6 @@ export class CreateAgentDTO {
   @IsString()
   password: string;
 
-  @IsIn(['admin', 'agent'])
-  role: string;
+  @IsIn(['admin', 'operator'])
+  role: AgentRole;
 }
